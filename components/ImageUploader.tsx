@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { PhotoIcon } from './icons/PhotoIcon';
 
@@ -62,9 +61,9 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onFilesAdded }) =>
       />
       <label htmlFor="file-upload" className="flex flex-col items-center justify-center text-center cursor-pointer">
         <PhotoIcon className="w-16 h-16 text-gray-500 mb-4" />
-        <h2 className="text-xl font-bold text-white mb-2">Drag & drop your product images</h2>
-        <p className="text-gray-400">or click to browse</p>
-        <p className="text-xs text-gray-500 mt-4">PNG, JPG, WEBP supported</p>
+        <h2 className="text-xl font-bold text-white mb-2">제품 이미지를 이곳에 끌어다 놓으세요</h2>
+        <p className="text-gray-400">또는 클릭해서 파일 찾기</p>
+        <p className="text-xs text-gray-500 mt-4">PNG, JPG, WEBP 파일 지원</p>
       </label>
     </div>
   );

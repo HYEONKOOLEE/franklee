@@ -1,5 +1,5 @@
 {
-  "name": "AI Product Photography Studio",
-  "description": "An AI-powered web application that transforms your product photos into professional-grade studio shots. Upload an image, choose your background, lighting, and other effects, and let AI generate stunning visuals for your e-commerce or social media needs.",
+  "name": "AI 제품 사진 스튜디오 v1",
+  "description": "AI를 활용하여 제품 사진을 전문적인 스튜디오 사진처럼 변환해주는 웹 애플리케이션입니다. 이미지를 업로드하고 배경, 조명 등 다양한 효과를 선택하면, AI가 이커머스나 소셜미디어에 활용할 수 있는 멋진 비주얼을 생성해줍니다.",
   "requestFramePermissions": []
 }

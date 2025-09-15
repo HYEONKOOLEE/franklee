@@ -89,9 +89,11 @@ export const generateProductImage = async (
     settings: Settings,
     modelImageFile: File | null
 ): Promise<string> => {
+  // Fix: Use process.env.API_KEY as per the coding guidelines.
   if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable is not set.");
+    throw new Error("API_KEY 환경 변수가 설정되지 않았습니다. Vercel 또는 호스팅 환경에서 설정을 확인해주세요.");
   }
+  // Fix: Initialize GoogleGenAI with process.env.API_KEY.
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
   const productImagePart = await fileToGenerativePart(productImageFile);
@@ -129,7 +131,7 @@ export const generateProductImage = async (
   const responseParts = response.candidates?.[0]?.content?.parts;
 
   if (!responseParts) {
-      throw new Error("Invalid response from the model. No content parts found.");
+      throw new Error("모델로부터 잘못된 응답을 받았습니다. 콘텐츠를 찾을 수 없습니다.");
   }
 
   const imageResultPart = responseParts.find(part => part.inlineData);
@@ -140,19 +142,21 @@ export const generateProductImage = async (
   
   const textResultPart = responseParts.find(part => part.text);
   if (textResultPart && textResultPart.text) {
-      throw new Error(`Model returned text instead of an image: ${textResultPart.text}`);
+      throw new Error(`모델이 이미지 대신 텍스트를 반환했습니다: ${textResultPart.text}`);
   }
 
-  throw new Error("Could not generate image or find image data in response.");
+  throw new Error("이미지를 생성하거나 응답에서 이미지 데이터를 찾을 수 없습니다.");
 };
 
 export const editProductImage = async (
     base64ImageUrl: string,
     editPrompt: string
 ): Promise<string> => {
+    // Fix: Use process.env.API_KEY as per the coding guidelines.
     if (!process.env.API_KEY) {
-        throw new Error("API_KEY environment variable is not set.");
+        throw new Error("API_KEY 환경 변수가 설정되지 않았습니다. Vercel 또는 호스팅 환경에서 설정을 확인해주세요.");
     }
+    // Fix: Initialize GoogleGenAI with process.env.API_KEY.
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     const mimeType = base64ImageUrl.match(/data:(.*);base64,/)?.[1] ?? 'image/png';
@@ -180,7 +184,7 @@ export const editProductImage = async (
     const responseParts = response.candidates?.[0]?.content?.parts;
 
     if (!responseParts) {
-        throw new Error("Invalid response from the model. No content parts found.");
+        throw new Error("모델로부터 잘못된 응답을 받았습니다. 콘텐츠를 찾을 수 없습니다.");
     }
 
     const imageResultPart = responseParts.find(part => part.inlineData);
@@ -191,8 +195,8 @@ export const editProductImage = async (
 
     const textResultPart = responseParts.find(part => part.text);
     if (textResultPart && textResultPart.text) {
-        throw new Error(`Model returned text instead of an image: ${textResultPart.text}`);
+        throw new Error(`모델이 이미지 대신 텍스트를 반환했습니다: ${textResultPart.text}`);
     }
 
-    throw new Error("Could not generate edited image or find image data in response.");
+    throw new Error("수정된 이미지를 생성하거나 응답에서 이미지 데이터를 찾을 수 없습니다.");
 };

@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { ControlPanel } from './components/ControlPanel';
 import { ImageUploader } from './components/ImageUploader';
@@ -8,6 +7,42 @@ import type { Settings, ProductImage, ProcessedImage } from './types';
 import { generateProductImage, editProductImage } from './services/geminiService';
 import { BACKGROUND_OPTIONS, LIGHTING_OPTIONS, ANGLE_OPTIONS, SNS_OPTIONS } from './constants';
 import { applyPostProcessing } from './utils/imageUtils';
+
+const getApiErrorMessage = (error: any): string => {
+  const defaultMessage = `이미지 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.`;
+
+  if (!error.message) {
+    return defaultMessage;
+  }
+  
+  if (error.message.includes("API_KEY 환경 변수가 설정되지 않았습니다")) {
+    return "애플리케이션에 API 키가 설정되지 않았습니다. 관리자에게 문의해주세요.";
+  }
+
+  try {
+    // Attempt to parse the error message which might be a JSON string
+    const errorJson = JSON.parse(error.message);
+    const apiError = errorJson.error;
+
+    if (apiError) {
+      if (apiError.code === 429 || apiError.status === "RESOURCE_EXHAUSTED") {
+        return "API 무료 사용량 한도를 초과했습니다. 잠시 후 다시 시도해주세요. 문제가 계속되면 Google AI Studio에서 결제 계정을 연결하여 제한을 늘릴 수 있습니다.";
+      }
+      if (apiError.code === 400 && apiError.message.includes("API key not valid")) {
+         return "설정된 API 키가 유효하지 않습니다. 관리자에게 문의해주세요.";
+      }
+      return `API 오류: ${apiError.message} (코드: ${apiError.code})`;
+    }
+  } catch (e) {
+    // Not a JSON message, return the original message if it's a simple string
+     if (typeof error.message === 'string' && !error.message.startsWith('{')) {
+        return `오류: ${error.message}`;
+    }
+  }
+  
+  return defaultMessage;
+};
+
 
 export default function App() {
   const [productImages, setProductImages] = useState<ProductImage[]>([]);
@@ -28,7 +63,6 @@ export default function App() {
   const [progress, setProgress] = useState({ current: 0, total: 0 });
   const [activeImageId, setActiveImageId] = useState<string | null>(null);
   const [finalImageUrl, setFinalImageUrl] = useState<string | null>(null);
-
 
   const handleFilesAdded = (files: File[]) => {
     const newImages: ProductImage[] = files.map(file => ({
@@ -70,7 +104,7 @@ export default function App() {
         .then(setFinalImageUrl)
         .catch(err => {
           console.error("Failed to post-process for preview:", err);
-          setError("Failed to apply post-processing for preview.");
+          setError("미리보기에 후처리 효과를 적용하지 못했습니다.");
           setFinalImageUrl(activeProcessedImage.url); // Fallback to unprocessed image
         }).finally(() => setIsLoading(false));
     } else {
@@ -81,6 +115,7 @@ export default function App() {
 
   const handleGenerate = useCallback(async () => {
     if (!activeImage) return;
+
     setIsLoading(true);
     setError(null);
     try {
@@ -94,9 +129,9 @@ export default function App() {
         ...prev.filter(p => p.sourceId !== activeImage.id),
         newProcessedImage
       ]);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      setError('Failed to generate image. Please check the console for details.');
+      setError(getApiErrorMessage(e));
     } finally {
       setIsLoading(false);
     }
@@ -104,11 +139,13 @@ export default function App() {
 
   const handleBatchProcess = useCallback(async () => {
     if (productImages.length === 0) return;
+    
     setIsLoading(true);
     setError(null);
     setProgress({ current: 0, total: productImages.length });
     
     const newProcessed: ProcessedImage[] = [];
+    let batchError: string | null = null;
 
     for (let i = 0; i < productImages.length; i++) {
       const image = productImages[i];
@@ -119,10 +156,20 @@ export default function App() {
           sourceId: image.id,
           url: `data:image/png;base64,${resultBase64}`,
         });
-      } catch (e) {
+      } catch (e: any) {
         console.error(`Failed to process ${image.file.name}:`, e);
+        batchError = getApiErrorMessage(e);
+        // Stop batch processing on critical errors
+        if (batchError.includes("API")) {
+          setError(`${image.file.name} 처리 중 중단됨: ${batchError}`);
+          break; 
+        }
       }
       setProgress({ current: i + 1, total: productImages.length });
+    }
+
+    if(batchError && !error) {
+        setError("일부 이미지 처리 중 오류가 발생했습니다.");
     }
 
     setProcessedImages(prev => {
@@ -132,7 +179,7 @@ export default function App() {
     });
 
     setIsLoading(false);
-  }, [productImages, settings, modelImage]);
+  }, [productImages, settings, modelImage, error]);
   
   const handleDownload = useCallback(async () => {
     if (!finalImageUrl) return;
@@ -163,14 +210,13 @@ export default function App() {
         ...prev.filter(p => p.sourceId !== sourceId),
         newEditedImage
       ]);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      setError('Failed to edit image. Please check the console for details.');
+      setError(getApiErrorMessage(e));
     } finally {
       setIsLoading(false);
     }
   }, [processedImages]);
-
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-900 text-gray-100 font-sans">

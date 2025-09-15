@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { Settings, ProductImage } from '../types';
 import { BACKGROUND_OPTIONS, LIGHTING_OPTIONS, ANGLE_OPTIONS, SNS_OPTIONS, WATERMARK_POSITION_OPTIONS } from '../constants';
@@ -47,7 +46,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ settings, onSettings
 
   const handleBackgroundSelect = (value: string) => {
       const option = BACKGROUND_OPTIONS.find(opt => opt.value === value);
-      const isCustom = option?.label === 'Custom';
+      const isCustom = option?.label === '직접 입력';
       setSelectedBackgroundValue(value);
       if (!isCustom) {
         handleSettingChange('background', value);
@@ -58,7 +57,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ settings, onSettings
   
   const handleCustomBackgroundChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setCustomBackground(e.target.value);
-      if (BACKGROUND_OPTIONS.find(opt => opt.value === selectedBackgroundValue)?.label === 'Custom') {
+      if (BACKGROUND_OPTIONS.find(opt => opt.value === selectedBackgroundValue)?.label === '직접 입력') {
           handleSettingChange('background', e.target.value);
       }
   };
@@ -74,45 +73,45 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ settings, onSettings
 
   return (
     <aside className="w-full lg:w-96 bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-2xl flex-shrink-0 h-full overflow-y-auto border border-gray-700">
-      <Section title="Background">
+      <Section title="배경">
          <div className={`grid grid-cols-2 gap-2 ${isCustomModelMode ? 'opacity-50 pointer-events-none' : ''}`}>
             {BACKGROUND_OPTIONS.map(opt => (
                 <OptionButton key={opt.value} label={opt.label} value={opt.value} selectedValue={selectedBackgroundValue} onSelect={handleBackgroundSelect} />
             ))}
         </div>
-        {BACKGROUND_OPTIONS.find(opt => opt.value === selectedBackgroundValue)?.label === 'Custom' && !isCustomModelMode && (
+        {BACKGROUND_OPTIONS.find(opt => opt.value === selectedBackgroundValue)?.label === '직접 입력' && !isCustomModelMode && (
             <input
                 type="text"
-                placeholder="Describe your background..."
+                placeholder="원하는 배경을 설명해주세요..."
                 value={customBackground}
                 onChange={handleCustomBackgroundChange}
                 className="w-full mt-2 bg-gray-700 border-gray-600 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 transition"
             />
         )}
-        {isCustomModelMode && <p className="text-xs text-gray-400 mt-2">Background is determined by the model's photo.</p>}
+        {isCustomModelMode && <p className="text-xs text-gray-400 mt-2">배경은 모델 사진에 따라 결정됩니다.</p>}
       </Section>
       
-      <Section title="Lighting">
+      <Section title="조명">
         <div className={isCustomModelMode ? 'opacity-50 pointer-events-none' : ''}>
             {LIGHTING_OPTIONS.map(opt => (
                 <OptionButton key={opt.value} label={opt.label} value={opt.value} selectedValue={settings.lighting} onSelect={(v) => handleSettingChange('lighting', v)} />
             ))}
         </div>
-        {isCustomModelMode && <p className="text-xs text-gray-400 mt-2">Lighting is determined by the model's photo.</p>}
+        {isCustomModelMode && <p className="text-xs text-gray-400 mt-2">조명은 모델 사진에 따라 결정됩니다.</p>}
       </Section>
 
-      <Section title="Angle">
+      <Section title="카메라 각도">
         <div className={`grid grid-cols-2 gap-2 ${isCustomModelMode ? 'opacity-50 pointer-events-none' : ''}`}>
             {ANGLE_OPTIONS.map(opt => (
                 <OptionButton key={opt.value} label={opt.label} value={opt.value} selectedValue={settings.angle} onSelect={(v) => handleSettingChange('angle', v)} />
             ))}
         </div>
-        {isCustomModelMode && <p className="text-xs text-gray-400 mt-2">Angle is determined by the model's pose.</p>}
+        {isCustomModelMode && <p className="text-xs text-gray-400 mt-2">각도는 모델의 포즈에 따라 결정됩니다.</p>}
       </Section>
 
-      <Section title="Add a Human Model">
+      <Section title="인물 모델 추가">
         <label className="flex items-center justify-between p-3 bg-gray-700 rounded-md cursor-pointer hover:bg-gray-600">
-            <span className="text-sm font-medium text-gray-200">Use Human Model</span>
+            <span className="text-sm font-medium text-gray-200">인물 모델 사용</span>
             <div className={`w-11 h-6 flex items-center bg-gray-600 rounded-full p-1 duration-300 ease-in-out ${settings.useModel ? 'bg-indigo-500' : ''}`}>
                 <div className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${settings.useModel ? 'translate-x-5' : ''}`}></div>
             </div>
@@ -126,21 +125,21 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ settings, onSettings
         {settings.useModel && (
           <div className="mt-4 p-3 bg-gray-700/50 rounded-lg space-y-4">
             <div>
-                <p className="text-xs text-gray-300 mb-2">Model Interaction:</p>
+                <p className="text-xs text-gray-300 mb-2">모델 상호작용:</p>
                 <div className="grid grid-cols-3 gap-2">
-                    <OptionButton label="Wearing" value="wearing" selectedValue={settings.modelInteraction} onSelect={v => handleSettingChange('modelInteraction', v as any)} />
-                    <OptionButton label="Holding" value="holding" selectedValue={settings.modelInteraction} onSelect={v => handleSettingChange('modelInteraction', v as any)} />
-                    <OptionButton label="Posing" value="posing" selectedValue={settings.modelInteraction} onSelect={v => handleSettingChange('modelInteraction', v as any)} />
+                    <OptionButton label="착용" value="wearing" selectedValue={settings.modelInteraction} onSelect={v => handleSettingChange('modelInteraction', v as any)} />
+                    <OptionButton label="들고 있기" value="holding" selectedValue={settings.modelInteraction} onSelect={v => handleSettingChange('modelInteraction', v as any)} />
+                    <OptionButton label="함께 서 있기" value="posing" selectedValue={settings.modelInteraction} onSelect={v => handleSettingChange('modelInteraction', v as any)} />
                 </div>
             </div>
             {modelImage ? (
                 <div className="relative group">
-                    <p className="text-xs text-gray-300 mb-2">Using custom model:</p>
+                    <p className="text-xs text-gray-300 mb-2">사용 중인 모델:</p>
                     <img src={modelImage.url} alt="Model preview" className="w-full h-auto rounded-md object-cover max-h-48" />
                     <button 
                         onClick={onRemoveModelImage}
                         className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 outline-none"
-                        aria-label="Remove model image"
+                        aria-label="모델 이미지 제거"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
@@ -148,8 +147,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ settings, onSettings
             ) : (
                 <label htmlFor="model-upload" className="cursor-pointer w-full flex flex-col items-center justify-center py-4 bg-gray-700 hover:bg-gray-600 rounded-md border-2 border-dashed border-gray-500 transition-colors">
                     <UserIcon className="w-8 h-8 text-gray-400" />
-                    <span className="text-sm font-semibold mt-2 text-gray-200">Upload Model Photo</span>
-                    <span className="text-xs text-gray-400">(Required for model features)</span>
+                    <span className="text-sm font-semibold mt-2 text-gray-200">모델 사진 업로드</span>
+                    <span className="text-xs text-gray-400">(모델 기능 사용 시 필수)</span>
                     <input id="model-upload" type="file" accept="image/*" className="hidden" onChange={handleModelFileChange} />
                 </label>
             )}
@@ -157,18 +156,18 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ settings, onSettings
         )}
       </Section>
 
-      <Section title="Export Settings">
+      <Section title="내보내기 설정">
          <div className="space-y-4">
             <input
                 type="text"
-                placeholder="Add Watermark (e.g., YourBrand)"
+                placeholder="워터마크 추가 (예: YourBrand)"
                 value={settings.watermark}
                 onChange={e => handleSettingChange('watermark', e.target.value)}
                 className="w-full bg-gray-700 border-gray-600 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 transition"
             />
             {settings.watermark && (
               <div>
-                <p className="text-xs text-gray-300 mb-2">Watermark Position:</p>
+                <p className="text-xs text-gray-300 mb-2">워터마크 위치:</p>
                 <div className="grid grid-cols-3 gap-2">
                   {WATERMARK_POSITION_OPTIONS.map(opt => (
                     <button
@@ -204,7 +203,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ settings, onSettings
           disabled={isProcessing}
           className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 disabled:bg-indigo-900 disabled:text-gray-400 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center shadow-lg"
         >
-          {isProcessing ? 'Processing...' : 'Generate Image'}
+          {isProcessing ? '처리 중...' : '이미지 생성'}
         </button>
         {imageCount > 1 && (
             <button
@@ -212,7 +211,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ settings, onSettings
                 disabled={isProcessing}
                 className="w-full bg-gray-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-700 disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed transition-all duration-300"
             >
-                {isProcessing ? 'Batch Processing...' : `Process All ${imageCount} Images`}
+                {isProcessing ? '일괄 처리 중...' : `전체 ${imageCount}개 이미지 처리`}
             </button>
         )}
       </div>
